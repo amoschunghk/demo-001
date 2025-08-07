@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乒乓球課堂提醒系統 (多學員版本)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            touch-action: manipulation;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+        select, input[type="date"], input[type="text"], input[type="number"], input[type="tel"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 80px;
+        }
+        button {
+            padding: 10px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .live-preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            width: 100%;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .whatsapp-btn:hover {
+            background-color: #128C7E;
+        }
+        .whatsapp-btn i {
+            margin-right: 10px;
+        }
+        .copy-btn {
+            background: #9b59b6;
+        }
+        .copy-btn:hover {
+            background: #8e44ad;
+        }
+        .sync-btn {
+            background: #2ecc71;
+        }
+        .sync-btn:hover {
+            background: #27ae60;
+        }
+        .guide {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-left: 4px solid #4CAF50;
+            margin-bottom: 20px;
+            border-radius: 0 5px 5px 0;
+        }
+        .guide h3 {
+            margin-top: 0;
+            color: #2c7be5;
+        }
+        .guide-step {
+            margin-bottom: 10px;
+            display: flex;
+        }
+        .step-number {
+            background-color: #4CAF50;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        .tab {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 0 5px 5px 5px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .time-selector {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+        }
+        .selected-times {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f8ff;
+            border-radius: 4px;
+            width: 100%;
+        }
+        .selected-time {
+            font-weight: bold;
+            color: #1565C0;
+        }
+        .duration-display {
+            color: #666;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .location-btns {
+            display: grid;
+            gap: 5px;
+            margin-top: 5px;
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .location-btn {
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .location-btn.active {
+            border: 2px solid #333;
+            transform: scale(0.98);
+        }
+        #taiWaiBtn { background-color: #B3E5FC; }
+        #austinBtn { background-color: #C8E6C9; }
+        #tsuenWanBtn { background-color: #FFE0B2; }
+        .reminder-preview {
+            background-color: #e3f2fd;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        /* 表格樣式 */
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .students-table th, .students-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .students-table th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        .students-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .students-table tr:hover {
+            background-color: #f1f1f1;
+        }
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+        .action-btn {
+            padding: 5px 8px;
+            font-size: 12px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .add-row-btn {
+            background-color: #4CAF50;
+            color: white;
+            margin-bottom: 10px;
+        }
+        .remove-row-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .preview-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .preview-item h4 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .batch-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .duration-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .duration-btn {
+            padding: 8px 12px;
+            background-color: #B3E5FC;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .duration-btn:hover {
+            background-color: #81D4FA;
+        }
+        .duration-btn.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .tab {
+                display: block;
+                width: 100%;
+                margin-bottom: 5px;
+                border-radius: 5px;
+            }
+            .time-selector {
+                flex-direction: column;
+            }
+            .location-btns {
+                grid-template-columns: 1fr;
+            }
+            .students-table {
+                font-size: 14px;
+            }
+            .students-table th, .students-table td {
+                padding: 5px;
+            }
+            .action-btns {
+                flex-direction: column;
+            }
+            .batch-actions {
+                flex-direction: column;
+            }
+            .duration-buttons {
+                flex-direction: column;
+            }
+            .duration-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>乒乓球課堂提醒系統 (多學員版本)</h1>
+        
+        <!-- 使用指南 -->
+        <div class="guide">
+            <h3>使用指南</h3>
+            <div class="guide-step">
+                <div class="step-number">1</div>
+                <div>在「基本設定」標籤填寫共用資訊如教練和地點</div>
+            </div>
+            <div class="guide-step">
+                <div class="step-number">2</div>
+                <div>在「學員課堂」標籤填寫所有學員的上課時間和日期</div>
+            </div>
+            <div class="guide-step">
+                <div class="step-number">3</div>
+                <div>在「預覽發送」標籤查看並發送提醒訊息</div>
+            </div>
+        </div>
+
+        <!-- 標籤導航 -->
+        <div class="tab-container">
+            <div class="tab active" onclick="openTab('settings-tab')">基本設定</div>
+            <div class="tab" onclick="openTab('students-tab')">學員課堂</div>
+            <div class="tab" onclick="openTab('preview-tab')">預覽發送</div>
+        </div>
+
+        <!-- 基本設定標籤 -->
+        <div id="settings-tab" class="tab-content active">
+            <div class="form-section">
+                <h2>基本設定</h2>
+                <div class="guide">
+                    <p>請填寫所有課堂共用的基本資訊，這些將應用於所有學員的提醒訊息中。</p>
+                </div>
+                
+                <div class="input-group">
+                    <label>🏫 負責教練</label>
+                    <input type="text" id="reminderCoachName" required placeholder="請輸入教練姓名">
+                </div>
+
+                <div class="input-group">
+                    <label>上課地點</label>
+                    <div class="location-btns">
+                        <div class="location-btn active" id="taiWaiBtn" onclick="selectLocation('乒乓匯智大圍總校', this)">大圍總校</div>
+                        <div class="location-btn" id="austinBtn" onclick="selectLocation('乒乓匯智柯士甸分校', this)">柯士甸分校</div>
+                        <div class="location-btn" id="tsuenWanBtn" onclick="selectLocation('乒乓匯智荃灣分校', this)">荃灣分校</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>通用備注</label>
+                    <textarea id="commonRemarks" rows="3" placeholder="輸入適用於所有學員的注意事項（如：特別裝備要求、家長接送安排等）"></textarea>
+                </div>
+            </div>
+            
+            <div class="navigation-buttons">
+                <div></div> <!-- 空div用於佔位 -->
+                <button onclick="openTab('students-tab')">下一步：學員課堂 <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- 學員課堂標籤 -->
+        <div id="students-tab" class="tab-content">
+            <div class="form-section">
+                <h2>學員課堂資訊</h2>
+                <div class="guide">
+                    <p>請在下方表格中填寫所有學員的上課資訊。新增學員時，開始時間會自動設置為上一位學員的結束時間。</p>
+                </div>
+                
+                <button class="add-row-btn" onclick="addStudentRow()"><i class="fas fa-plus"></i> 添加學員</button>
+                
+                <div class="table-container">
+                    <table class="students-table" id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>學生姓名</th>
+                                <th>上課日期</th>
+                                <th>開始時間</th>
+                                <th>結束時間</th>
+                                <th>備注</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 行將由JavaScript動態添加 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="input-group">
+                    <label>快速設置課堂時長</label>
+                    <div class="duration-buttons">
+                        <button class="duration-btn" onclick="setDurationForSelected(1)">1小時</button>
+                        <button class="duration-btn" onclick="setDurationForSelected(1.5)">1.5小時</button>
+                        <button class="duration-btn" onclick="setDurationForSelected(2)">2小時</button>
+                        <button class="duration-btn" onclick="setDurationForSelected(2.5)">2.5小時</button>
+                    </div>
+                    <p class="duration-display">選中行後點擊按鈕可快速設置結束時間</p>
+                </div>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button onclick="openTab('settings-tab')"><i class="fas fa-arrow-left"></i> 上一步：基本設定</button>
+                <button onclick="openTab('preview-tab'); updateReminderPreview();">下一步：預覽發送 <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- 預覽發送標籤 -->
+        <div id="preview-tab" class="tab-content">
+            <div class="form-section">
+                <h2>預覽與發送</h2>
+                <div class="guide">
+                    <p>以下是根據您輸入的資料生成的所有提醒訊息，請確認無誤後選擇發送方式。</p>
+                </div>
+                
+                <div class="batch-actions">
+                    <button onclick="updateReminderPreview()"><i class="fas fa-sync-alt"></i> 更新預覽</button>
+                    <button onclick="copyAllReminders()" class="copy-btn"><i class="fas fa-copy"></i> 複製全部內容</button>
+                    <button onclick="sendAllWhatsApp()" class="whatsapp-btn"><i class="fab fa-whatsapp"></i> 發送全部到 WhatsApp</button>
+                </div>
+                
+                <h3>預覽訊息：</h3>
+                <div id="allMessagesPreview">
+                    <!-- 預覽將由JavaScript動態生成 -->
+                </div>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button onclick="openTab('students-tab')"><i class="fas fa-arrow-left"></i> 上一步：學員課堂</button>
+                <div></div> <!-- 空div用於佔位 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 時間段配置
+        const timeOptions = [];
+        for (let hour = 8; hour < 22; hour++) {
+            for (let minute = 0; minute < 60; minute += 15) {
+                const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                timeOptions.push(time);
+            }
+        }
+
+        let selectedLocation = '乒乓匯智大圍總校';
+        let storedCoachName = '';
+        let lastEndTime = ''; // 記錄最後一個學員的結束時間
+        let selectedRow = null; // 當前選中的行
+
+        // 標籤切換功能
+        function openTab(tabId) {
+            // 隱藏所有標籤內容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有標籤的active類
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 顯示選中的標籤內容
+            document.getElementById(tabId).classList.add('active');
+            
+            // 為選中的標籤添加active類
+            event.currentTarget.classList.add('active');
+        }
+
+        // 添加學員行
+        function addStudentRow(studentData = {}) {
+            const tbody = document.querySelector('#studentsTable tbody');
+            const row = document.createElement('tr');
+            
+            // 設置默認日期為今天
+            const today = new Date();
+            const defaultDate = today.toISOString().split('T')[0];
+            
+            // 如果沒有指定開始時間，使用上一個學員的結束時間
+            let defaultStartTime = studentData.startTime || lastEndTime || '';
+            
+            row.innerHTML = `
+                <td><input type="text" class="student-name" value="${studentData.name || ''}" placeholder="學生姓名" required></td>
+                <td><input type="date" class="class-date" value="${studentData.date || defaultDate}" required></td>
+                <td>
+                    <select class="start-time" required>
+                        <option value="">選擇時間</option>
+                        ${timeOptions.map(time => 
+                            `<option value="${time}" ${defaultStartTime === time ? 'selected' : ''}>${time}</option>`
+                        ).join('')}
+                    </select>
+                </td>
+                <td>
+                    <select class="end-time" required>
+                        <option value="">選擇時間</option>
+                        ${timeOptions.map(time => 
+                            `<option value="${time}" ${studentData.endTime === time ? 'selected' : ''}>${time}</option>`
+                        ).join('')}
+                    </select>
+                    <div class="duration-display">${defaultStartTime && studentData.endTime ? formatDuration(calculateDuration(defaultStartTime, studentData.endTime)) : ''}</div>
+                </td>
+                <td><input type="text" class="remarks" value="${studentData.remarks || ''}" placeholder="個人備注"></td>
+                <td class="action-btns">
+                    <button class="action-btn remove-row-btn" onclick="removeStudentRow(this)"><i class="fas fa-trash"></i> 刪除</button>
+                </td>
+            `;
+            
+            // 添加事件監聽器來更新持續時間顯示
+            const startSelect = row.querySelector('.start-time');
+            const endSelect = row.querySelector('.end-time');
+            const durationDisplay = row.querySelector('.duration-display');
+            
+            startSelect.addEventListener('change', function() {
+                updateRowDuration(row);
+                // 更新最後一個學員的結束時間
+                updateLastEndTime();
+            });
+            
+            endSelect.addEventListener('change', function() {
+                updateRowDuration(row);
+                // 更新最後一個學員的結束時間
+                updateLastEndTime();
+            });
+            
+            // 添加點擊事件，選中行
+            row.addEventListener('click', function() {
+                selectRow(this);
+            });
+            
+            tbody.appendChild(row);
+            
+            // 更新最後一個學員的結束時間
+            updateLastEndTime();
+            
+            // 選中新添加的行
+            selectRow(row);
+            
+            return row;
+        }
+
+        // 選中行
+        function selectRow(row) {
+            // 移除之前選中行的樣式
+            document.querySelectorAll('#studentsTable tbody tr').forEach(r => {
+                r.style.backgroundColor = '';
+            });
+            
+            // 設置新選中行的樣式
+            row.style.backgroundColor = '#e3f2fd';
+            selectedRow = row;
+        }
+
+        // 刪除學員行
+        function removeStudentRow(button) {
+            const row = button.closest('tr');
+            row.remove();
+            // 更新最後一個學員的結束時間
+            updateLastEndTime();
+        }
+
+        // 更新行的持續時間顯示
+        function updateRowDuration(row) {
+            const startTime = row.querySelector('.start-time').value;
+            const endTime = row.querySelector('.end-time').value;
+            const durationDisplay = row.querySelector('.duration-display');
+            
+            if (startTime && endTime) {
+                const duration = calculateDuration(startTime, endTime);
+                durationDisplay.textContent = formatDuration(duration);
+            } else {
+                durationDisplay.textContent = '';
+            }
+        }
+
+        // 更新最後一個學員的結束時間
+        function updateLastEndTime() {
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            if (rows.length > 0) {
+                const lastRow = rows[rows.length - 1];
+                lastEndTime = lastRow.querySelector('.end-time').value;
+            } else {
+                lastEndTime = '';
+            }
+        }
+
+        // 為選中行設置持續時間
+        function setDurationForSelected(hours) {
+            if (!selectedRow) {
+                alert('請先選中要設置的學員行！');
+                return;
+            }
+            
+            const startTime = selectedRow.querySelector('.start-time').value;
+            if (!startTime) {
+                alert('請先設置開始時間！');
+                return;
+            }
+            
+            // 計算結束時間
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const totalMinutes = startHour * 60 + startMinute + Math.round(hours * 60);
+            const endHour = Math.floor(totalMinutes / 60);
+            const endMinute = totalMinutes % 60;
+            const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+            
+            // 設置結束時間
+            const endSelect = selectedRow.querySelector('.end-time');
+            endSelect.value = endTime;
+            
+            // 更新持續時間顯示
+            updateRowDuration(selectedRow);
+            
+            // 更新最後一個學員的結束時間
+            updateLastEndTime();
+        }
+
+        // 計算持續時間
+        function calculateDuration(start, end) {
+            if (!start || !end) return 0;
+            
+            const startHour = parseInt(start.substring(0, 2));
+            const startMinute = parseInt(start.substring(3));
+            const endHour = parseInt(end.substring(0, 2));
+            const endMinute = parseInt(end.substring(3));
+            
+            const startTotal = startHour * 60 + startMinute;
+            const endTotal = endHour * 60 + endMinute;
+            
+            return (endTotal - startTotal) / 60; // 轉換為小時
+        }
+
+        // 格式化持續時間顯示
+        function formatDuration(duration) {
+            if (duration <= 0) return '0小時';
+            
+            const hours = Math.floor(duration);
+            const minutes = Math.round((duration % 1) * 60);
+            
+            if (minutes === 0) {
+                return `${hours}小時`;
+            } else {
+                return `${hours}小時${minutes}分鐘`;
+            }
+        }
+
+        // 選擇地點
+        function selectLocation(location, element) {
+            selectedLocation = location;
+            document.querySelectorAll('.location-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        // 生成單個學員的提醒訊息
+        function generateStudentReminder(studentData) {
+            const date = studentData.date;
+            const student = studentData.name;
+            const coach = document.getElementById('reminderCoachName').value || '未填寫';
+            const remarks = studentData.remarks || '';
+            const commonRemarks = document.getElementById('commonRemarks').value || '';
+            const duration = calculateDuration(studentData.startTime, studentData.endTime);
+
+            // 格式化日期顯示
+            let formattedDate = date;
+            if (date) {
+                const dateObj = new Date(date);
+                const days = ['日', '一', '二', '三', '四', '五', '六'];
+                const dayOfWeek = days[dateObj.getDay()];
+                formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}（週${dayOfWeek}）`;
+            }
+
+            return `【${student} - 乒乓球課堂提醒】
+🗓 日期：${formattedDate || '未填寫'}
+⏰ 時間：${studentData.startTime || '未選擇'} - ${studentData.endTime || '未選擇'} (${formatDuration(duration)})
+📍 地點：${selectedLocation}
+🎓 學生：${student}
+🏫 教練：${coach}
+
+溫馨提示：
+1. 請提前10分鐘到校
+2. 到達後可自行熱身
+3. 請準備好球拍、運動服裝和飲用水
+4. 到達後請向${coach}教練報到
+
+${remarks ? `個人備注：\n${remarks}\n\n` : ''}${commonRemarks ? `通用備注：\n${commonRemarks}` : ''}`;
+        }
+
+        // 更新所有提醒預覽
+        function updateReminderPreview() {
+            // 驗證必填欄位
+            if (!validateForm()) {
+                return;
+            }
+            
+            // 儲存教練名稱以便下次使用
+            storedCoachName = document.getElementById('reminderCoachName').value;
+            
+            const previewContainer = document.getElementById('allMessagesPreview');
+            previewContainer.innerHTML = '';
+            
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            if (rows.length === 0) {
+                previewContainer.innerHTML = '<p>沒有學員資料，請返回「學員課堂」標籤添加學員。</p>';
+                return;
+            }
+            
+            rows.forEach((row, index) => {
+                const studentData = {
+                    name: row.querySelector('.student-name').value,
+                    date: row.querySelector('.class-date').value,
+                    startTime: row.querySelector('.start-time').value,
+                    endTime: row.querySelector('.end-time').value,
+                    remarks: row.querySelector('.remarks').value
+                };
+                
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                previewItem.innerHTML = `
+                    <h4>提醒訊息 #${index + 1} - ${studentData.name}</h4>
+                    <div class="reminder-preview">${generateStudentReminder(studentData)}</div>
+                    <div class="action-btns">
+                        <button onclick="copySingleReminder(${index})" class="copy-btn"><i class="fas fa-copy"></i> 複製此訊息</button>
+                        <button onclick="sendSingleWhatsApp(${index})" class="whatsapp-btn"><i class="fab fa-whatsapp"></i> 發送此訊息</button>
+                    </div>
+                `;
+                
+                previewContainer.appendChild(previewItem);
+            });
+        }
+
+        // 複製單個提醒
+        function copySingleReminder(index) {
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            if (index >= rows.length) return;
+            
+            const row = rows[index];
+            const studentData = {
+                name: row.querySelector('.student-name').value,
+                date: row.querySelector('.class-date').value,
+                startTime: row.querySelector('.start-time').value,
+                endTime: row.querySelector('.end-time').value,
+                remarks: row.querySelector('.remarks').value
+            };
+            
+            const text = generateStudentReminder(studentData);
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`已複製 ${studentData.name} 的提醒訊息到剪貼簿！`);
+            }).catch(err => {
+                console.error('複製失敗:', err);
+                alert('複製失敗，請手動選取預覽內容進行複製。');
+            });
+        }
+
+        // 複製所有提醒
+        function copyAllReminders() {
+            // 驗證必填欄位
+            if (!validateForm()) {
+                return;
+            }
+            
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            if (rows.length === 0) {
+                alert('沒有學員資料可複製！');
+                return;
+            }
+            
+            let allText = '';
+            
+            rows.forEach((row, index) => {
+                const studentData = {
+                    name: row.querySelector('.student-name').value,
+                    date: row.querySelector('.class-date').value,
+                    startTime: row.querySelector('.start-time').value,
+                    endTime: row.querySelector('.end-time').value,
+                    remarks: row.querySelector('.remarks').value
+                };
+                
+                allText += generateStudentReminder(studentData);
+                allText += '\n\n--------------------------------\n\n';
+            });
+            
+            navigator.clipboard.writeText(allText).then(() => {
+                alert(`已複製 ${rows.length} 個學員的提醒訊息到剪貼簿！`);
+            }).catch(err => {
+                console.error('複製失敗:', err);
+                alert('複製失敗，請手動選取預覽內容進行複製。');
+            });
+        }
+
+        // 發送單個提醒到WhatsApp
+        function sendSingleWhatsApp(index) {
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            if (index >= rows.length) return;
+            
+            const row = rows[index];
+            const studentData = {
+                name: row.querySelector('.student-name').value,
+                date: row.querySelector('.class-date').value,
+                startTime: row.querySelector('.start-time').value,
+                endTime: row.querySelector('.end-time').value,
+                remarks: row.querySelector('.remarks').value
+            };
+            
+            const message = encodeURIComponent(generateStudentReminder(studentData));
+            window.open(`https://wa.me/?text=${message}`);
+        }
+
+        // 發送所有提醒到WhatsApp
+        function sendAllWhatsApp() {
+            // 驗證必填欄位
+            if (!validateForm()) {
+                return;
+            }
+            
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            if (rows.length === 0) {
+                alert('沒有學員資料可發送！');
+                return;
+            }
+            
+            let allText = '';
+            
+            rows.forEach(row => {
+                const studentData = {
+                    name: row.querySelector('.student-name').value,
+                    date: row.querySelector('.class-date').value,
+                    startTime: row.querySelector('.start-time').value,
+                    endTime: row.querySelector('.end-time').value,
+                    remarks: row.querySelector('.remarks').value
+                };
+                
+                allText += generateStudentReminder(studentData);
+                allText += '\n\n--------------------------------\n\n';
+            });
+            
+            const message = encodeURIComponent(allText);
+            window.open(`https://wa.me/?text=${message}`);
+        }
+
+        // 表單驗證
+        function validateForm() {
+            // 驗證教練名稱
+            const coachName = document.getElementById('reminderCoachName').value.trim();
+            if (!coachName) {
+                alert('請先填寫負責教練姓名！');
+                openTab('settings-tab');
+                return false;
+            }
+            
+            // 驗證學員資料
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            if (rows.length === 0) {
+                alert('請至少添加一個學員的課堂資料！');
+                openTab('students-tab');
+                return false;
+            }
+            
+            let hasError = false;
+            let errorMessages = [];
+            
+            rows.forEach((row, index) => {
+                const studentName = row.querySelector('.student-name').value.trim();
+                const date = row.querySelector('.class-date').value;
+                const startTime = row.querySelector('.start-time').value;
+                const endTime = row.querySelector('.end-time').value;
+                
+                if (!studentName) {
+                    hasError = true;
+                    errorMessages.push(`第 ${index + 1} 行：缺少學生姓名`);
+                }
+                
+                if (!date) {
+                    hasError = true;
+                    errorMessages.push(`第 ${index + 1} 行：缺少上課日期`);
+                }
+                
+                if (!startTime) {
+                    hasError = true;
+                    errorMessages.push(`第 ${index + 1} 行：缺少開始時間`);
+                }
+                
+                if (!endTime) {
+                    hasError = true;
+                    errorMessages.push(`第 ${index + 1} 行：缺少結束時間`);
+                }
+                
+                if (startTime && endTime) {
+                    const duration = calculateDuration(startTime, endTime);
+                    if (duration <= 0) {
+                        hasError = true;
+                        errorMessages.push(`第 ${index + 1} 行：結束時間必須晚於開始時間`);
+                    }
+                }
+            });
+            
+            if (hasError) {
+                alert('請修正以下錯誤：\n\n' + errorMessages.join('\n'));
+                openTab('students-tab');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 添加初始行
+            addStudentRow();
+            
+            // 如果之前有儲存教練名稱，則恢復
+            if (storedCoachName) {
+                document.getElementById('reminderCoachName').value = storedCoachName;
+            }
+            
+            // 初始更新預覽
+            updateReminderPreview();
+        });
+    </script>
+</body>
+</html>
